@@ -1,22 +1,86 @@
-import { Produto } from "./models/Produto";
 
-const produto = new Produto(
-  "001",
-  "Bolacha Maizena",
-  12.99,
-  10
+import { Produto } from "./models/Produto";
+import { Estoque } from "./Estoque";
+
+// Tipos de produtos
+class ProdutoAlimenticio extends Produto {}
+
+class ProdutoBebida extends Produto {}
+
+// Fábrica de produtos
+abstract class ProdutoFactory {
+  abstract criarProduto(
+    codigo: string,
+    nome: string,
+    preco: number,
+    quantidade: number
+  ): Produto;
+}
+
+// Fábrica de alimentos
+class FabricaAlimentos extends ProdutoFactory {
+  criarProduto(
+    codigo: string,
+    nome: string,
+    preco: number,
+    quantidade: number
+  ): Produto {
+    return new ProdutoAlimenticio(
+      codigo, nome, preco, quantidade
+    );
+  }
+}
+
+// Fábrica de bebidas
+class FabricaBebidas extends ProdutoFactory {
+  criarProduto(
+    codigo: string,
+    nome: string,
+    preco: number,
+    quantidade: number
+  ): Produto {
+    return new ProdutoBebida(
+      codigo, nome, preco, quantidade
+    );
+  }
+}
+
+// Programa principal
+const estoque = Estoque.getInstance();
+
+const alimentos = new FabricaAlimentos();
+const bebidas = new FabricaBebidas();
+
+const arroz = alimentos.criarProduto(
+  "001", "Arroz 5 kg", 25.90, 10
 );
 
-console.log("Produto:", produto.nome);
-console.log("Quantidade inicial:", produto.quantidade);
+const agua = bebidas.criarProduto(
+  "002", "Água mineral", 3.50, 20
+);
 
-produto.adicionarEstoque(5);
-console.log("Após entrada:", produto.quantidade);
+estoque.cadastrarProduto(arroz);
+estoque.cadastrarProduto(agua);
 
-produto.retirarEstoque(3);
-console.log("Após saída:", produto.quantidade);
+arroz.adicionarEstoque(5);
+agua.retirarEstoque(3);
+
+console.log("Produtos no estoque:");
+
+for (const produto of estoque.listarProdutos()) {
+  console.log(
+    `${produto.nome} - Quantidade: ${produto.quantidade}`
+  );
+
+  console.log(
+    `Valor total: ${produto.calcularValorTotal().toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    })}`
+  );
+}
 
 console.log(
-  "Valor total em estoque:",
-  produto.calcularValorTotal()
+  "O estoque é o mesmo?",
+  estoque === Estoque.getInstance()
 );
