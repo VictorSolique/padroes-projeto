@@ -1,12 +1,13 @@
-
 import { Produto } from "./models/Produto";
 import { Estoque } from "./Estoque";
 
 // Tipos de produtos
 class ProdutoAlimenticio extends Produto {}
 class ProdutoBebida extends Produto {}
+class ProdutoLimpeza extends Produto {}
+class ProdutoAcessorioLimpeza extends Produto {}
 
-// Factory Method
+// Factory Method: cria um tipo de produto por vez
 abstract class ProdutoFactory {
   abstract criarProduto(
     codigo: string,
@@ -35,6 +36,63 @@ class FabricaBebidas extends ProdutoFactory {
     quantidade: number
   ): Produto {
     return new ProdutoBebida(codigo, nome, preco, quantidade);
+  }
+}
+
+// Abstract Factory: cria uma família de produtos relacionados
+abstract class FabricaSetor {
+  abstract criarProdutoPrincipal(
+    codigo: string,
+    nome: string,
+    preco: number,
+    quantidade: number
+  ): Produto;
+
+  abstract criarProdutoComplementar(
+    codigo: string,
+    nome: string,
+    preco: number,
+    quantidade: number
+  ): Produto;
+}
+
+class FabricaSupermercado extends FabricaSetor {
+  criarProdutoPrincipal(
+    codigo: string,
+    nome: string,
+    preco: number,
+    quantidade: number
+  ): Produto {
+    return new ProdutoAlimenticio(codigo, nome, preco, quantidade);
+  }
+
+  criarProdutoComplementar(
+    codigo: string,
+    nome: string,
+    preco: number,
+    quantidade: number
+  ): Produto {
+    return new ProdutoBebida(codigo, nome, preco, quantidade);
+  }
+}
+
+class FabricaLimpeza extends FabricaSetor {
+  criarProdutoPrincipal(
+    codigo: string,
+    nome: string,
+    preco: number,
+    quantidade: number
+  ): Produto {
+    return new ProdutoLimpeza(codigo, nome, preco, quantidade);
+  }
+
+  criarProdutoComplementar(
+    codigo: string,
+    nome: string,
+    preco: number,
+    quantidade: number
+  ): Produto {
+    return new ProdutoAcessorioLimpeza(codigo, nome, preco, quantidade);
   }
 }
 
@@ -70,28 +128,35 @@ class ProdutoBuilder {
       throw new Error("Confira os dados do produto.");
     }
 
-    return new Produto(
-      this.codigo,
-      this.nome,
-      this.preco,
-      this.quantidade
-    );
+    return new Produto(this.codigo, this.nome, this.preco, this.quantidade);
   }
 }
 
 // Programa principal
 const estoque = Estoque.getInstance();
 
+// Produtos criados com Factory Method
 const alimentos = new FabricaAlimentos();
 const bebidas = new FabricaBebidas();
 
-// Produtos criados pelas fábricas
-const arroz = alimentos.criarProduto(
-  "001", "Arroz 5 kg", 25.90, 10
-);
+const arroz = alimentos.criarProduto("001", "Arroz 5 kg", 25.90, 10);
+const agua = bebidas.criarProduto("002", "Água mineral", 3.50, 20);
 
-const agua = bebidas.criarProduto(
-  "002", "Água mineral", 3.50, 20
+// Produtos criados com Abstract Factory
+const supermercado = new FabricaSupermercado();
+const limpeza = new FabricaLimpeza();
+
+const leite = supermercado.criarProdutoPrincipal(
+  "005", "Leite", 5.50, 8
+);
+const suco = supermercado.criarProdutoComplementar(
+  "006", "Suco", 6.00, 10
+);
+const detergente = limpeza.criarProdutoPrincipal(
+  "007", "Detergente", 3.25, 12
+);
+const esponja = limpeza.criarProdutoComplementar(
+  "008", "Esponja de limpeza", 2.00, 15
 );
 
 // Produto criado usando Builder
@@ -110,6 +175,10 @@ estoque.cadastrarProduto(arroz);
 estoque.cadastrarProduto(agua);
 estoque.cadastrarProduto(feijao);
 estoque.cadastrarProduto(feijaoCopia);
+estoque.cadastrarProduto(leite);
+estoque.cadastrarProduto(suco);
+estoque.cadastrarProduto(detergente);
+estoque.cadastrarProduto(esponja);
 
 // Operações de estoque
 arroz.adicionarEstoque(5);
