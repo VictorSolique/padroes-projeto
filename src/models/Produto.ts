@@ -1,5 +1,11 @@
+
 export class Produto {
-  constructor(public readonly codigo: string, public nome: string, public preco: number, public quantidade: number) {}
+  constructor(
+    public readonly codigo: string,
+    public nome: string,
+    public preco: number,
+    public quantidade: number
+  ) {}
 
   public adicionarEstoque(quantidade: number): void {
     if (quantidade <= 0) {
@@ -22,6 +28,15 @@ export class Produto {
   }
 
   public calcularValorTotal(): number {
-  return Math.round(this.preco * this.quantidade * 100) / 100;
-}
+    return Math.round(this.preco * this.quantidade * 100) / 100;
+  }
+
+  public clonar(codigo: string, nome: string = this.nome): Produto {
+    return new Produto(
+      codigo,
+      nome,
+      this.preco,
+      this.quantidade
+    );
+  }
 }
