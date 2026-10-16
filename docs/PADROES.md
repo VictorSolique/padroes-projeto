@@ -1,118 +1,69 @@
-# 📦 Sistema de Controle de Estoque
+# Padrões de Projeto no Controle de Estoque
 
-Projeto acadêmico desenvolvido em **TypeScript** para a disciplina de Padrões de Projeto.
+Este documento explica como os cinco padrões criacionais foram usados no projeto, onde estão no código, qual problema ajudam a resolver e por que fazem sentido neste exemplo.
 
-O sistema tem como objetivo gerenciar produtos, controlar entradas e saídas de mercadorias e calcular o valor total dos itens disponíveis em estoque.
+## 1. Factory Method
 
-Durante o desenvolvimento, serão aplicados os cinco padrões criacionais estudados na disciplina:
+**Onde está:** `src/index.ts`, nas classes `ProdutoFactory`, `FabricaAlimentos` e `FabricaBebidas`.
 
-- Factory Method;
-- Abstract Factory;
-- Builder;
-- Prototype;
-- Singleton.
+**O que faz:** define um método para criar um produto e deixa que cada fábrica escolha qual tipo de produto será criado.
 
-Os padrões serão integrados ao sistema para resolver problemas reais de criação e gerenciamento de objetos.
+**Problema que resolve:** evita concentrar todas as decisões de criação de produtos em um único trecho do programa. O código que usa a fábrica pede um produto sem precisar chamar diretamente o construtor de cada tipo concreto.
 
-## 🛠️ Tecnologias utilizadas
+**Por que faz sentido:** o estoque pode trabalhar com diferentes tipos de produtos, como alimentos e bebidas.
 
-- **TypeScript:** linguagem utilizada no desenvolvimento.
-- **Node.js:** ambiente de execução.
-- **tsx:** execução direta de arquivos TypeScript durante o desenvolvimento.
-- **Git e GitHub:** controle de versão e armazenamento do projeto.
+## 2. Abstract Factory
 
-## 📁 Estrutura do projeto
+**Onde está:** `src/index.ts`, nas classes `FabricaSetor`, `FabricaSupermercado` e `FabricaLimpeza`.
 
-```text
-padroes-projeto/
-├── src/
-│   ├── models/
-│   │   └── Produto.ts
-│   └── index.ts
-├── docs/
-│   └── TEMA.md
-├── .gitignore
-├── package.json
-├── package-lock.json
-├── tsconfig.json
-└── README.md
-```
+**O que faz:** define uma fábrica que cria uma família de produtos relacionados. Neste exemplo, cada fábrica tem métodos para criar um produto principal e um produto complementar.
 
-### Responsabilidade dos arquivos
+**Problema que resolve:** organiza a criação de conjuntos de produtos de um mesmo setor, em vez de escolher cada item de forma isolada.
 
-- `src/models/Produto.ts`: representa um produto e contém operações de entrada, saída e cálculo do valor total em estoque.
-- `src/index.ts`: executa um exemplo de utilização da classe Produto.
-- `docs/TEMA.md`: descreve o domínio e os objetivos do sistema.
-- `package.json`: registra as dependências e os comandos de execução.
-- `tsconfig.json`: configura a compilação do TypeScript.
-- `.gitignore`: define quais arquivos e pastas não devem ser versionados.
+**Por que faz sentido:** o exemplo representa dois setores: supermercado, com alimentos e bebidas, e limpeza, com produtos e acessórios de limpeza.
 
-## ⚙️ Pré-requisitos
+**Diferença para Factory Method:** o Factory Method cria um produto por chamada; o Abstract Factory agrupa métodos de criação de uma família de produtos relacionados.
 
-Antes de executar o projeto, instale o [Node.js](https://nodejs.org/), que inclui o npm.
+## 3. Builder
 
-Para conferir as versões instaladas, execute:
+**Onde está:** `src/index.ts`, na classe `ProdutoBuilder`.
 
-```bash
-node -v
-npm -v
-```
+**O que faz:** permite informar o código, nome, preço e quantidade em etapas separadas e, ao final, criar o produto com `construir()`.
 
-## 🚀 Instalação
+**Problema que resolve:** evita precisar passar todos os dados de criação juntos quando queremos montar o objeto passo a passo. O método `construir()` também confere se os dados básicos foram preenchidos.
+
+**Por que faz sentido:** produtos possuem várias informações, e o Builder demonstra como organizá-las antes de criar o objeto.
+
+## 4. Prototype
+
+**Onde está:** `src/models/Produto.ts`, no método `clonar()`.
+
+**O que faz:** cria outro produto usando os dados de um produto existente. O novo produto pode receber um código e um nome diferentes.
+
+**Problema que resolve:** evita preencher novamente todos os dados quando queremos criar um produto parecido com outro.
+
+**Por que faz sentido:** no exemplo, a cópia do feijão mantém o preço e a quantidade do original, mas usa outro código e outro nome.
+
+**Observação:** o método atual cria uma nova instância de `Produto` com os dados copiados. É adequado para o exemplo simples usado neste projeto.
+
+## 5. Singleton
+
+**Onde está:** `src/Estoque.ts`, na classe `Estoque`.
+
+**O que faz:** mantém uma única instância do estoque. O construtor é privado e o método `getInstance()` devolve a instância compartilhada.
+
+**Problema que resolve:** evita que diferentes partes do programa criem estoques separados por acidente.
+
+**Por que faz sentido:** no exemplo, todos os produtos são cadastrados no mesmo estoque. O programa verifica isso comparando `Estoque.getInstance()` com a instância que já está usando.
+
+## Como conferir o projeto
 
 Na raiz do projeto, execute:
 
 ```bash
 npm install
-```
-
-Esse comando instala as dependências definidas no `package.json`.
-
-## ▶️ Como executar
-
-### Executar diretamente o TypeScript
-
-Durante o desenvolvimento, utilize:
-
-```bash
+npm run build
 npm run dev
 ```
 
-Esse comando utiliza o `tsx` para executar `src/index.ts` diretamente, sem exigir a geração prévia de arquivos JavaScript.
-
-### Verificar a compilação
-
-Para verificar se o código TypeScript compila sem erros, execute:
-
-```bash
-npm run build
-```
-
-A compilação gera os arquivos JavaScript na pasta `dist/`.
-
-### Executar pelo script de inicialização
-
-Se o script `start` estiver configurado para utilizar o `tsx`, execute:
-
-```bash
-npm start
-```
-
-## 📋 Funcionalidades iniciais
-
-Atualmente, o sistema possui uma estrutura inicial para:
-
-- Criar um produto com código, nome, preço e quantidade;
-- Registrar entradas de mercadorias;
-- Registrar saídas, impedindo quantidades negativas;
-- Calcular o valor total dos produtos disponíveis.
-
-## 📚 Padrões de projeto
-
-Os cinco padrões criacionais serão implementados gradualmente e integrados ao sistema durante as quatro aulas.
-
-A aplicação e a justificativa de cada padrão serão documentadas em `docs/PADROES.md` conforme forem desenvolvidas.
-
-## 🎯 Objetivo acadêmico
-
-O projeto busca demonstrar a aplicação prática dos padrões criacionais, utilizando TypeScript e orientação a objetos, com foco na organização do código, na integração das funcionalidades e na compreensão das decisões de projeto.
+A saída mostra os produtos cadastrados, suas quantidades, o valor total e a confirmação do Singleton (`true`).
