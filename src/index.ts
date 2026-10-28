@@ -132,34 +132,79 @@ class ProdutoBuilder {
   }
 }
 
+// Facade: organiza as operações do estoque
+class EstoqueFacade {
+  constructor(private estoque: Estoque) {}
+
+  cadastrarPelaFabrica(
+    fabrica: ProdutoFactory,
+    codigo: string,
+    nome: string,
+    preco: number,
+    quantidade: number
+  ): Produto {
+    const produto = fabrica.criarProduto(codigo, nome, preco, quantidade);
+    this.estoque.cadastrarProduto(produto);
+    return produto;
+  }
+
+  cadastrarProduto(produto: Produto): void {
+    this.estoque.cadastrarProduto(produto);
+  }
+
+  adicionarEstoque(codigo: string, quantidade: number): void {
+    const produto = this.estoque.buscarProduto(codigo);
+
+    if (!produto) {
+      throw new Error("Produto não encontrado.");
+    }
+
+    produto.adicionarEstoque(quantidade);
+  }
+
+  retirarEstoque(codigo: string, quantidade: number): void {
+    const produto = this.estoque.buscarProduto(codigo);
+
+    if (!produto) {
+      throw new Error("Produto não encontrado.");
+    }
+
+    produto.retirarEstoque(quantidade);
+  }
+
+  listarProdutos(): Produto[] {
+    return this.estoque.listarProdutos();
+  }
+}
+
 // Programa principal
 const estoque = Estoque.getInstance();
+const facade = new EstoqueFacade(estoque);
 
-// Produtos criados com Factory Method
-const alimentos = new FabricaAlimentos();
-const bebidas = new FabricaBebidas();
+// Factory Method: cria e cadastra os produtos em sequência
+const arroz = facade.cadastrarPelaFabrica(
+  new FabricaAlimentos(), "001", "Arroz 5 kg", 25.90, 10
+);
 
-const arroz = alimentos.criarProduto("001", "Arroz 5 kg", 25.90, 10);
-const agua = bebidas.criarProduto("002", "Água mineral", 3.50, 20);
+const agua = facade.cadastrarPelaFabrica(
+  new FabricaBebidas(), "002", "Água mineral", 3.50, 20
+);
 
-// Produtos criados com Abstract Factory
+// Abstract Factory: cria produtos de famílias relacionadas
 const supermercado = new FabricaSupermercado();
 const limpeza = new FabricaLimpeza();
 
-const leite = supermercado.criarProdutoPrincipal(
-  "005", "Leite", 5.50, 8
-);
-const suco = supermercado.criarProdutoComplementar(
-  "006", "Suco", 6.00, 10
-);
-const detergente = limpeza.criarProdutoPrincipal(
-  "007", "Detergente", 3.25, 12
-);
-const esponja = limpeza.criarProdutoComplementar(
-  "008", "Esponja de limpeza", 2.00, 15
-);
+const leite = supermercado.criarProdutoPrincipal("005", "Leite", 5.50, 8);
+const suco = supermercado.criarProdutoComplementar("006", "Suco", 6.00, 10);
+const detergente = limpeza.criarProdutoPrincipal("007", "Detergente", 3.25, 12);
+const esponja = limpeza.criarProdutoComplementar("008", "Esponja de limpeza", 2.00, 15);
 
-// Produto criado usando Builder
+facade.cadastrarProduto(leite);
+facade.cadastrarProduto(suco);
+facade.cadastrarProduto(detergente);
+facade.cadastrarProduto(esponja);
+
+// Builder: monta um produto aos poucos
 const feijao = new ProdutoBuilder()
   .definirCodigo("003")
   .definirNome("Feijão 1 kg")
@@ -167,27 +212,19 @@ const feijao = new ProdutoBuilder()
   .definirQuantidade(5)
   .construir();
 
-// Prototype: cópia do produto feijão
+facade.cadastrarProduto(feijao);
+
+// Prototype: cria uma cópia de um produto
 const feijaoCopia = feijao.clonar("004", "Feijão 1 kg - Cópia");
+facade.cadastrarProduto(feijaoCopia);
 
-// Cadastro dos produtos
-estoque.cadastrarProduto(arroz);
-estoque.cadastrarProduto(agua);
-estoque.cadastrarProduto(feijao);
-estoque.cadastrarProduto(feijaoCopia);
-estoque.cadastrarProduto(leite);
-estoque.cadastrarProduto(suco);
-estoque.cadastrarProduto(detergente);
-estoque.cadastrarProduto(esponja);
+// Facade: procura os produtos e executa as operações
+facade.adicionarEstoque("001", 5);
+facade.retirarEstoque("002", 3);
 
-// Operações de estoque
-arroz.adicionarEstoque(5);
-agua.retirarEstoque(3);
-
-// Exibição dos produtos
 console.log("Produtos no estoque:");
 
-for (const produto of estoque.listarProdutos()) {
+for (const produto of facade.listarProdutos()) {
   console.log(`\nCódigo: ${produto.codigo}`);
   console.log(`Nome: ${produto.nome}`);
   console.log(`Quantidade: ${produto.quantidade}`);
@@ -199,8 +236,4 @@ for (const produto of estoque.listarProdutos()) {
   );
 }
 
-// Verificação do Singleton
-console.log(
-  "\nO estoque é o mesmo?",
-  estoque === Estoque.getInstance()
-);
+console.log("\nO estoque é o mesmo?", estoque === Estoque.getInstance());
